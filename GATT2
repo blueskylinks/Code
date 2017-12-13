@@ -1,0 +1,241 @@
+package com.bleskylinks.scan_ble_test;
+
+import android.Manifest;
+import android.app.ProgressDialog;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothProfile;
+import android.content.Context;
+import android.content.Intent;
+import android.location.LocationManager;
+import android.os.ParcelUuid;
+import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanFilter;
+import android.bluetooth.le.ScanRecord;
+import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
+import android.widget.ToggleButton;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+
+public class MainActivity extends AppCompatActivity {
+
+    private BluetoothManager mBluetoothManager;
+    private BluetoothAdapter mBluetoothAdapter;
+
+    BluetoothLeScanner scanner;
+
+    TextView text_ble_scandata;
+    ScanRecord scan_rec; // this object will be used to hold the data obtained from the BLE scanning
+    private BluetoothGatt mGatt; //
+    private BluetoothDevice ble_device;
+
+    String message;
+
+    public static String nrf_service = "000000f1-0000-1000-8000-00805f9b34fb";
+    public final static UUID NRF_UUID_SERVICE = UUID.fromString(nrf_service);
+
+    public BluetoothGattCharacteristic characteristicTX;
+
+    public static String nrf_tx = "0000a001-0000-1000-8000-00805f9b34fb";
+    public final static UUID NRF_UUID_TX = UUID.fromString(nrf_tx);
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        text_ble_scandata = (TextView) findViewById(R.id.scan_rec_text);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},200);
+        ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},200);
+        initialize();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Toast.makeText(this, "App Resumed..", Toast.LENGTH_SHORT).show();
+        Log.i("TEST", "App Resumed now........");
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Toast.makeText(this, "App Paused..", Toast.LENGTH_SHORT).show();
+    }
+
+    // ============Initilize BLE ===========================
+    public boolean initialize() {
+        // For API level 18 and above, get a reference to BluetoothAdapter through
+        // BluetoothManager.
+        Log.i("BleScanning:", "initilizing.......");
+        if (mBluetoothManager == null) {
+            mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+            if (mBluetoothManager == null) {
+                Log.i("BleScanning:", "Unable to initialize BluetoothManager.");
+                return false;
+            }
+        }
+
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+
+        // Check if the Bluetooth is available on the device or not, the mBluetoothAdapter will not be initilise if no hardware found or
+        // system error
+        if (mBluetoothAdapter == null) {
+            Log.i("BleScanning:", "Unable to obtain a BluetoothAdapter.");
+            return false;
+        }
+
+        // IF Bluetooth adapter is not enabled, run this code to enable the bluetooth on the adroid device
+
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            //Bluetooth is disabled
+            mBluetoothAdapter.enable();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
+    }
+
+
+    //================  Start BLE Scanning  ===============
+    public void startscand(View v1) {
+        Log.i("BLE------", "Start Scanning");
+        //final ParcelUuid UID_SERVICE = ParcelUuid.fromString("000000f1-0000-1000-8000-00805f9b34fb");
+        scanner = mBluetoothAdapter.getBluetoothLeScanner();
+        ScanFilter beaconFilter = new ScanFilter.Builder() // this filter will be used to get only specific device based on service UUID
+                //.setServiceUuid(UID_SERVICE)
+                .build();
+        ArrayList<ScanFilter> filters = new ArrayList<ScanFilter>();
+        filters.add(beaconFilter);
+        ScanSettings settings = new ScanSettings.Builder()
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                .build();
+        scanner.startScan(filters, settings, mcallback);
+    }
+
+    // =============== BLE Callback =======================
+    // This callback method will be automatically called every time the scanner get the device adv data
+    public ScanCallback mcallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            int rssi;
+            rssi = result.getRssi();
+            scan_rec = result.getScanRecord();
+            text_ble_scandata.setText(String.valueOf(rssi) + scan_rec.toString());
+            ble_device = result.getDevice();
+        }
+
+
+    };
+
+    //===========================================================================
+    public BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            Log.i("onConnectionStateChange", "Status: " + newState);
+
+            switch (newState) {
+                case BluetoothProfile.STATE_CONNECTED:
+                    Log.i("gattCallback", "STATE_CONNECTED");
+                    gatt.discoverServices();
+                    break;
+                case BluetoothProfile.STATE_DISCONNECTED:
+                    Log.i("gattCallback", "STATE_DISCONNECTED");
+                    Intent intent = new Intent();
+                    intent.setAction("CUSTOM_INTENT");
+                    intent.putExtra("D1", "STATE_DISCONNECTED");
+                    sendBroadcast(intent);
+                    break;
+                default:
+                    Log.i("gattCallback", "STATE_OTHER");
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            List<BluetoothGattService> services = gatt.getServices();
+            BluetoothGattService service1;
+            Log.i("onServicesDiscovered", services.toString());
+            service1=gatt.getService(NRF_UUID_SERVICE);
+            characteristicTX = services.get(2).getCharacteristic(NRF_UUID_TX);
+        }
+
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt,BluetoothGattCharacteristic characteristic, int status) {
+            Log.i("onCharacteristicRead", characteristic.toString());
+            final byte b1[]=characteristic.getValue();
+            for (int i=0;i<b1.length;i++){
+                Log.i(":",String.valueOf(b1[i]));
+            }
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt,BluetoothGattCharacteristic characteristic, int status) {
+            Log.i("onCharacteristicWrite??", characteristic.toString());
+            final byte b1[]=characteristic.getValue();
+            for (int i=0;i<b1.length;i++){
+                Log.i(":",String.valueOf(b1[i]));
+            }
+        }
+
+    };
+
+
+    public void connect_device(View v1) {
+        stopscand();
+        if (ble_device!=null){
+            mGatt = ble_device.connectGatt(this, false, gattCallback);
+            Log.i("BLE", "Device Connected...");
+        }
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        senddata();
+
+    }
+
+    public void senddata() {
+        message = "a";
+        characteristicTX.setValue(message);
+        mGatt.writeCharacteristic(characteristicTX);
+
+    }
+
+
+    // =====   Stop BLE Scanning ==========================
+    public void stopscand() {
+        Log.i("BLE-----", "Stop Scanning");
+        scanner.stopScan(mcallback);
+    }
+
+
+
+
+}
