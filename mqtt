@@ -1,0 +1,191 @@
+package com.bleskylinks.mqtt_test2;
+
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.w3c.dom.Text;
+
+
+public class MainActivity1 extends Activity {
+
+    MqttClient client;
+
+
+    public void update_text(String message){
+        TextView t1 = (TextView) findViewById(R.id.mqtt_message);
+        t1.setText(message);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+           }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        MyReceiver1 myReceiver;
+        myReceiver = new MyReceiver1();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("CUSTOM_INTENT");
+        registerReceiver(myReceiver, intentFilter);
+    }
+
+    public void App (View v1){
+
+        TextView t1 = (TextView) findViewById(R.id.sendText);
+            String topic        = "test";
+            String content      = t1.getText().toString();
+            int qos             = 0;
+            String broker       = "tcp://13.126.9.228:1883";
+            String clientId     = "";
+            MemoryPersistence persistence = new MemoryPersistence();
+
+            try {
+                MqttClient sampleClient = new MqttClient(broker, clientId, persistence);
+                MqttConnectOptions connOpts = new MqttConnectOptions();
+                connOpts.setCleanSession(true);
+                Log.i("Connecting to broker: ", broker);
+                sampleClient.connect(connOpts);
+                Log.i("Connected", "C");
+                Log.i("Publishing message: ", content);
+                MqttMessage message = new MqttMessage(content.getBytes());
+                message.setQos(qos);
+                sampleClient.publish(topic, message);
+                Log.i("Message published", "M");
+                sampleClient.disconnect();
+                Log.i("Disconnected", "D");
+                //System.exit(0);
+            } catch(MqttException me) {
+                Log.i("reason ",String.valueOf(me.getReasonCode()));
+                Log.i("msg ",String.valueOf(me.getMessage()));
+                Log.i("loc ",String.valueOf(me.getLocalizedMessage()));
+                Log.i("cause ",String.valueOf(me.getCause()));
+                Log.i("excep ",String.valueOf(me));
+                me.printStackTrace();
+                }
+    }
+
+    public void mqtt_sub(View v1)  {
+
+        MqttCallback mqtt_callback = new MqttCallback() {
+            @Override
+            public void connectionLost(Throwable throwable) {
+
+            }
+
+            @Override
+            public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+                //t1.setText(mqttMessage.toString());
+                Intent intent = new Intent();
+                intent.setAction("CUSTOM_INTENT");
+                intent.putExtra("D1", mqttMessage.toString());
+                sendBroadcast(intent);
+
+                String s1= mqttMessage.toString();
+                Log.i(s,mqttMessage.toString());
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
+            }
+        };
+
+            String topic        = "test";
+            String content      = "Bleslylinks....";
+            int qos             = 0;
+            String broker       = "tcp://13.126.9.228:1883";
+            String clientId     = "";
+            MemoryPersistence persistence = new MemoryPersistence();
+
+            try {
+                MqttClient sampleClient = new MqttClient(broker, clientId, persistence);
+                MqttConnectOptions connOpts = new MqttConnectOptions();
+                connOpts.setCleanSession(true);
+                Log.i("Connecting to broker: ", broker);
+                sampleClient.connect(connOpts);
+                Log.i("Connected", "C");
+                MqttMessage message = new MqttMessage();
+                message.setPayload("A single message from my computer fff"
+                        .getBytes());
+                sampleClient.publish("test", message);
+                sampleClient.setCallback(mqtt_callback);
+                sampleClient.subscribe("test");
+
+                //Log.i("Publishing message: ", content);
+                //MqttMessage message = new MqttMessage(content.getBytes());
+                //message.setQos(qos);
+                //sampleClient.publish(topic, message);
+                //Log.i("Message published", "M");
+                //sampleClient.disconnect();
+                //Log.i("Disconnected", "D");
+                //System.exit(0);
+            } catch(MqttException me) {
+                Log.i("reason ",String.valueOf(me.getReasonCode()));
+                Log.i("msg ",String.valueOf(me.getMessage()));
+                Log.i("loc ",String.valueOf(me.getLocalizedMessage()));
+                Log.i("cause ",String.valueOf(me.getCause()));
+                Log.i("excep ",String.valueOf(me));
+                me.printStackTrace();
+            }
+
+    }
+
+    public class MyReceiver1 extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context arg0, Intent arg1) {
+            //Toast.makeText(context, "Intent Detected.", Toast.LENGTH_LONG).show();
+            String s1 = arg1.getStringExtra("D1");
+            Log.i("BLE,,,,,,,",s1);
+            TextView t1 = (TextView) findViewById(R.id.mqtt_message);
+            t1.setText(s1);
+        }
+
+    }
+
+
+
+}
+
+
+
