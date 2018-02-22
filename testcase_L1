@@ -1,0 +1,8 @@
+Test L1 Button to light LED1 on development board:
+Step 1:open UI_design android application and click on settings button
+	Expected result:device will be connected.
+Step 2:click on button L1.
+	Expected result:button L1 turns to red and LED1 switched on.
+Step 3:click again button L1.
+	Expected result:button L1 turns to green and LED1 switched off.
+	
