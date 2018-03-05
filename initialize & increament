@@ -1,0 +1,107 @@
+/** initialize the level
+*/
+void initilize_f1()
+{
+    switch(current_f1_status)
+    {
+        case 0:
+                 bsp_board_led_on(BSP_BOARD_LED_2);
+                break;
+        case 1:  
+                  bsp_board_led_on(BSP_BOARD_LED_3);
+                break;
+        case 2:
+                 bsp_board_led_on(BSP_BOARD_LED_4);
+                break;
+        case 3:
+                 bsp_board_led_on( BSP_BOARD_LED_5);
+                break;
+        case 4:
+                 bsp_board_led_on( BSP_BOARD_LED_6);
+                break;
+        case 5:
+                 bsp_board_led_on(BSP_BOARD_LED_7);
+                break;
+    }
+    switch(current_l1_status)
+    {
+        case 0:
+                  bsp_board_led_off(BSP_BOARD_LED_0);
+                break;
+        case 1:
+                 bsp_board_led_on( BSP_BOARD_LED_0);
+                break;
+    }
+    
+    switch(current_l2_status)
+    {
+        case 0:
+                 bsp_board_led_off( BSP_BOARD_LED_1);
+                break;
+        case 1:
+                 bsp_board_led_on (BSP_BOARD_LED_1);
+                break;
+    } 
+        
+}
+// Function to increase the level
+void trigger_fan_sw_high()
+{
+    if(current_f1_status<f1_max_limit)
+    {
+            current_f1_status++;
+             for(int j=0;j<=f1_max_limit;j++){
+               if(current_f1_status==j){
+                    switch(j)
+                    {
+                       case 0: 
+                               bsp_board_led_on(BSP_BOARD_LED_2);
+                                break;
+                        case 1:  
+                              bsp_board_led_on(BSP_BOARD_LED_3);
+                                break;
+                        case 2:
+                              bsp_board_led_on(BSP_BOARD_LED_4);
+                                break;
+                        case 3:
+                            bsp_board_led_on( BSP_BOARD_LED_5);
+                            break;
+                        case 4:
+                          bsp_board_led_on( BSP_BOARD_LED_6);
+                            break;
+                        case 5:
+                               bsp_board_led_on(BSP_BOARD_LED_7);
+                                break;
+                     }
+                     }
+                else{
+                   switch(j)
+                   {
+                      case 0: 
+                               bsp_board_led_off(BSP_BOARD_LED_2);
+                                break;
+                        case 1:  
+                              bsp_board_led_off(BSP_BOARD_LED_3);
+                                break;
+                        case 2:
+                              bsp_board_led_off(BSP_BOARD_LED_4);
+                                break;
+                        case 3:
+                            bsp_board_led_off( BSP_BOARD_LED_5);
+                            break;
+                        case 4:
+                          bsp_board_led_off( BSP_BOARD_LED_6);
+                            break;
+                        case 5:
+                               bsp_board_led_off(BSP_BOARD_LED_7);
+                                break;
+
+                   }
+
+             } 
+   }
+    
+    }
+   //manuf_sp_data[4]=current_f1_status;
+//    restartAdvertise();
+}
