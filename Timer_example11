@@ -67,7 +67,7 @@ static bsp_indication_t actual_state =  BSP_INDICATE_FIRST;         /**< Current
 
 static const char * indications_list[] = BSP_INDICATIONS_LIST;
 int i=0;
-static uint32_t timeout = 5000;
+static uint32_t timeout = 10000;
 APP_TIMER_DEF(m_led_a_timer_id);
 APP_TIMER_DEF(m_led_b_timer_id);
 
@@ -77,7 +77,7 @@ int counter;
 // Timeout handler for the repeated timer
 static void timer_a_handler(void * p_context)
 {
-nrf_gpio_pin_toggle(LED_2);
+nrf_gpio_pin_toggle(LED_3);
 if(timeout==0){
 NRF_LOG_INFO("timer function stopped!");
 app_timer_stop(m_led_a_timer_id);
@@ -91,7 +91,6 @@ app_timer_stop(m_led_a_timer_id);
 static void timer_b_handler(void * p_context)
 {
       nrf_gpio_pin_toggle(LED_1);
-       start_timer1(1000);
  }
 
 // Create timers
@@ -139,6 +138,7 @@ void bsp_evt_handler(bsp_event_t evt)
             NRF_LOG_INFO("Timer increament function");
             LEDS_ON(BSP_LED_0_MASK);
              start_timer2(10000);
+              start_timer1(1000);
             break;
 
         case BSP_EVENT_KEY_1:
