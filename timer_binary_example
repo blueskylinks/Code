@@ -1,0 +1,259 @@
+/**
+ * Copyright (c) 2014 - 2017, Nordic Semiconductor ASA
+ * 
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form, except as embedded into a Nordic
+ *    Semiconductor ASA integrated circuit in a product or a software update for
+ *    such product, must reproduce the above copyright notice, this list of
+ *    conditions and the following disclaimer in the documentation and/or other
+ *    materials provided with the distribution.
+ * 
+ * 3. Neither the name of Nordic Semiconductor ASA nor the names of its
+ *    contributors may be used to endorse or promote products derived from this
+ *    software without specific prior written permission.
+ * 
+ * 4. This software, with or without modification, must only be used with a
+ *    Nordic Semiconductor ASA integrated circuit.
+ * 
+ * 5. Any software provided in binary form under this license must not be reverse
+ *    engineered, decompiled, modified and/or disassembled.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY NORDIC SEMICONDUCTOR ASA "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY, NONINFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL NORDIC SEMICONDUCTOR ASA OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ */
+/** @file
+ *
+ * @defgroup bsp_example_main main.c
+ * @{
+ * @ingroup bsp_example
+ * @brief BSP Example Application main file.
+ *
+ */
+
+#include <stdbool.h>
+#include <stdint.h>
+#include "boards.h"
+#include "bsp.h"
+#include "app_timer.h"
+#include "nordic_common.h"
+#include "nrf_error.h"
+#include "nrf_delay.h"
+
+
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+
+#define BUTTON_PREV_ID           0                           /**< Button used to switch the state. */
+#define BUTTON_NEXT_ID           1                           /**< Button used to switch the state. */
+
+static bsp_indication_t actual_state =  BSP_INDICATE_FIRST;         /**< Currently indicated state. */
+
+static const char * indications_list[] = BSP_INDICATIONS_LIST;
+
+static uint32_t timeout = 15;
+static uint32_t countdown =0;
+APP_TIMER_DEF(m_led_a_timer_id);
+APP_TIMER_DEF(m_led_b_timer_id);
+
+int counter;
+int a[4],n,i;   
+
+
+
+// Timeout handler for the repeated timer
+static void timer_a_handler(void * p_context)
+{
+//nrf_gpio_pin_toggle(LED_3);
+if(timeout==0){
+NRF_LOG_INFO("timer function stopped!");
+app_timer_stop(m_led_a_timer_id);
+}
+ else {
+ NRF_LOG_INFO("Timer value: %d",timeout);
+ //convert_binary(timeout);
+ bin(timeout);
+ timeout-=1;
+ countdown+=1;
+ }
+} 
+ 
+void bin(unsigned n) 
+{ 
+    unsigned i; 
+    NRF_LOG_INFO("Binary of Given Number is:");
+    for (i = 1 << 3; i > 0; i = i / 2) {
+       a[i]= (n & i)? (1): (0); 
+        NRF_LOG_INFO("%ld",a[i]);
+        }
+} 
+
+ void convert_binary(int n){
+ for(i=0;n>0;i++)    
+  {    
+  a[i]=n%2;    
+  n=n/2;    
+  }    
+
+  NRF_LOG_INFO("Binary of Given Number is:");
+   for(i=i-1;i>=0;i--)    
+  {    
+  NRF_LOG_INFO("%ld",a[i]);  
+  }   
+    
+}
+// Timeout handler for the single shot timer
+static void timer_b_handler(void * p_context)
+{
+     // nrf_gpio_pin_toggle(LED_1);
+ }
+
+// Create timers
+static void create_timers()
+{   
+    uint32_t err_code;
+    // Create timers
+    err_code = app_timer_create(&m_led_a_timer_id,
+                                APP_TIMER_MODE_REPEATED,
+                                timer_a_handler);
+    APP_ERROR_CHECK(err_code);
+    
+    
+    err_code = app_timer_create(&m_led_b_timer_id,
+                                APP_TIMER_MODE_SINGLE_SHOT,
+                                timer_b_handler);
+    APP_ERROR_CHECK(err_code);
+} 
+ 
+// Start timers
+void start_timer1(int n)
+{
+    uint32_t err_code;
+     err_code = app_timer_start(m_led_a_timer_id, APP_TIMER_TICKS(n), NULL);
+        APP_ERROR_CHECK(err_code);
+} 
+
+// Start timers
+void start_timer2(int n)
+{
+    uint32_t err_code;
+     err_code = app_timer_start(m_led_b_timer_id, APP_TIMER_TICKS(n), NULL);
+        APP_ERROR_CHECK(err_code);
+} 
+
+
+/**@brief Function for handling bsp events.
+ */
+void bsp_evt_handler(bsp_event_t evt)
+{
+    uint32_t err_code;
+    switch (evt)
+    {
+        case BSP_EVENT_KEY_0:             
+            NRF_LOG_INFO("Timer increament function");
+           // LEDS_ON(BSP_LED_0_MASK);
+             //start_timer2(10000);
+              start_timer1(60000);
+            break;
+
+        case BSP_EVENT_KEY_1:
+          NRF_LOG_INFO("Timer decreament function");
+         // start_timer1(timeout);
+            break;
+
+            case BSP_EVENT_KEY_2:
+            //reset timer value
+           // app_timer_stop(m_led_b_timer_id);
+            //app_timer_stop(m_led_a_timer_id);
+            //timeout=0;
+
+            convert_binary(10);
+            break;
+
+        default:
+            return; // no implementation needed
+    }
+    
+}
+
+
+/**@brief Function for initializing low frequency clock.
+ */
+void clock_initialization()
+{
+    NRF_CLOCK->LFCLKSRC            = (CLOCK_LFCLKSRC_SRC_Xtal << CLOCK_LFCLKSRC_SRC_Pos);
+    NRF_CLOCK->EVENTS_LFCLKSTARTED = 0;
+    NRF_CLOCK->TASKS_LFCLKSTART    = 1;
+
+    while (NRF_CLOCK->EVENTS_LFCLKSTARTED == 0)
+    {
+        // Do nothing.
+    }
+}
+
+
+/**@brief Function for initializing bsp module.
+ */
+void bsp_configuration()
+{
+    uint32_t err_code;
+
+    err_code = bsp_init(BSP_INIT_LED | BSP_INIT_BUTTONS, bsp_evt_handler);
+    APP_ERROR_CHECK(err_code);
+}
+
+
+/**@brief Function for the Timer initialization.
+ *
+ * @details Initializes the timer module.
+ */
+static void timers_init(void)
+{
+    // Initialize timer module, making it use the scheduler
+    ret_code_t err_code = app_timer_init();
+    APP_ERROR_CHECK(err_code);
+}
+
+/**
+ * @brief Function for application main entry.
+ */
+int main(void)
+{
+    clock_initialization();
+     timers_init();
+    //uint32_t err_code = app_timer_init();
+   // APP_ERROR_CHECK(err_code);
+    APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
+    NRF_LOG_DEFAULT_BACKENDS_INIT();
+
+    create_timers();
+    bsp_configuration();
+
+    while (true)
+    {
+        NRF_LOG_FLUSH();
+        __SEV();
+        __WFE();
+        __WFE();
+        // no implementation needed
+    }
+}
+
+
+/** @} */
