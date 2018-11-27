@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Firebase Hosting</title>
+
+    <!-- update the version number as needed -->
+    <script defer src="/__/firebase/5.5.9/firebase-app.js"></script>
+    <!-- include only the Firebase features as you need -->
+    <script defer src="/__/firebase/5.5.9/firebase-auth.js"></script>
+    <script defer src="/__/firebase/5.5.9/firebase-database.js"></script>
+    <script defer src="/__/firebase/5.5.9/firebase-messaging.js"></script>
+    <script defer src="/__/firebase/5.5.9/firebase-storage.js"></script>
+    <!-- initialize the SDK after all desired features are loaded -->
+    <script defer src="/__/firebase/init.js"></script>
+
+    <style media="screen">
+      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+      #message,#display { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
+      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      #message input { line-height: 140%; margin: 16px 0 8px; font-size: 18px; }
+      #log {  text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
+      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
+      @media (max-width: 600px) {
+        body, #message { margin-top: 0; background: white; box-shadow: none; }
+        body { border-top: 16px solid #ffa100; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="message">
+      <h2>Welcome</h2>
+      
+	  <table>
+      <tr><td>User Name:</td><td><input type="text" name="Email" placeholder="Enter name" id="email"/></td></tr>
+	 <tr><td> Password:</td><td><input type="password" name="pass" id="pass" placeholder="Enter password"/></td></tr>
+      <tr><td></td><td><input type="submit" name="login" value="Login" id="log" onclick="login_user()"/></td></tr>
+	  </table>
+    </div>
+	
+	<div id="display" >
+	<h1>Logged in sucessfully!...</h1>
+	<input type="submit" name="login" value="Logout" id="log" onclick="logout()"/>
+	
+	</div>
+    <p id="load">Firebase SDK Loading&hellip;</p>
+	
+		<script src="https://www.gstatic.com/firebasejs/5.5.9/firebase.js"></script>
+		<script>
+			// Initialize Firebase
+		var config = {
+			apiKey: "AIzaSyCamZ43BgaMPY7wdPfuqET6VEcaE3tU5WA",
+			authDomain: "auth-51f8a.firebaseapp.com",
+			databaseURL: "https://auth-51f8a.firebaseio.com",
+			projectId: "auth-51f8a",
+			storageBucket: "auth-51f8a.appspot.com",
+			messagingSenderId: "961039771295"
+		};
+		firebase.initializeApp(config);
+</script>
+	<script src="index.js"></script>
+  </body>
+</html>
