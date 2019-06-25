@@ -1,0 +1,98 @@
+/**
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const functions = require('firebase-functions')
+const { dialogflow } = require('actions-on-google')
+const {Card} = require('dialogflow-fulfillment');
+const {BasicCard, Button} = require('actions-on-google');
+
+
+const app = dialogflow()
+
+  var admin = require("firebase-admin");
+  
+  var serviceAccount = {
+  "type": "service_account",
+  "project_id": "fcm-n1",
+  "private_key_id": "ca524e8b5c9ddd13ae3d21310eaca9125dc109f1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCecAmuyw7SKUWq\niIpt49dp46WhsdYHFh4FteBFbWA5OfgTfQMPrMuqLHCNhkqxa+Erg/IhKZqJBM5Z\ntwdWOjkGQ7UobOYhp+3ui9WDCvOJh+uS7wjxvYgJdtscKHpNDHzcRZgypluQVzfe\nhMGIRsWcwn0HZ9Qy4ICkuE1JRuRAS+1Ohzj/B+psJBmT3FoboK3fzQ0IcPA76LXF\nCHGDbTVfDJjivtP1owR5uWhs8l9plNIRDTb/lj6+ZouJmGxT0EJtbLjDP9OygRB6\nOjT/3h0acT4LwjeWNZcQwUuFoc4+JghIUzealga7UsvJs2G13jvahxgaX9v1TUNu\nUpdmET6tAgMBAAECggEACWmjkaBbrY2pJ2P8QWIPWqmdHfmYOwyL1RAElmtUk6HH\nhLThGS3NXbtNJoNLbbX4hyLMID8+AJTqA3d1tqA34hDkstWhaG93Gbxx/1qHtGyA\nSNbto5r8eX93rfkTpv8ubdGupJewiec8mPovGz8FH3aIggefmjQvQFn4sXlGNzGT\npgcR6r+SN7hUA56KzQL0GLWzKa4FPt+XeYPrJI1gWdqct3e5E+q56qh0HZ2tTiEB\nl7V5bmU1vAetRe52fDxNu53W1AXJ2++5fFBb/LIJ0///5LRyDa8nlKVpcAKfLDFr\nBPgNGy8nXgLddrmdmsXUqU71/78gE1BvjMPRxzG8MQKBgQDKQy3Br6cJlYLo9vdm\nuvRcvxjGYqgl/ZONUXKjmslpjpAXaOx5gpHKrb5qsNhz5USU0WFSrlG2YWUz7jEb\nUbUgPcmWzo6Dz8k+359JaQ+0Eie7OQNXH6MvNQSF5rGzp4BaX5hxkDI/qlHsUOfQ\nm/JjqBLPqEh617tM/i9oQU6OxQKBgQDIiCE4VTsjwNz5hG5wwrDH5T8EpFNlr1X0\n/p8yPwCCyIAEzrWu3TOf0QTV83oV330ytufhTS6QPNN+fczfrIuiiVlln07K4+Vj\nmcK2ZKt2WCcQkW7XYY0HlGYCLqoy7amDA6ZaZDAgisqIHcIcI2TDpBAwupsnwIhF\n+6s4JojuyQKBgQCBUoi8EYJcx2LHb7jpz1mUv36owcW/XK3uKoiBAOQNAOEyhpzE\naG6tR3+7mc0b9RhvipyOj/ShBw79MCvnystjjP4K1ZEbyExlTff7qRgoS39p3t86\n4nilI2H792/hbZTMs9i1q7vlJxJwZZ6CrGNDwuAcM/37xVn1tYQ8RZ1j/QKBgQC8\n5S6VyAOLbFM7X3pBEcRAqDuyfbBpar6Hp4oCZMJwb7nXzXfrHkdQ1i299DoefIWM\nziqjWnbwO7vlvU7Nq9Vk6Aij52rrR71/EwoNkcrKEcPKoZRNooCckTd9+sMsch9p\nYHjFUPbc0KBzk8STiOuUNulhXYZl7cDwW18v52y5sQKBgQCTNDIULMrIErV6BpBk\na6Q3iP4d+2IOeYMeGskxodF2pUOtgrmr5wYDOi/UiUkZM9V/qK1xHBzepXvq65dK\ngVN0hzDFPgXqSoF9jQ7L61eZz571j0MhqwuN5S+/3eUyNCYNgmS9sLdEENlweeYx\nckXhEfHsEUpVVm52VIkGIgNscw==\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-rxkuc@fcm-n1.iam.gserviceaccount.com",
+  "client_id": "117999556277547491504",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-rxkuc%40fcm-n1.iam.gserviceaccount.com"
+};
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://fcm-n1.firebaseio.com"
+});
+
+//var regtoken = "cWMcsHYMYSQ:APA91bG0Vvm2uRGwyskDSWHICY-gmGsBzkxEJ03QkavjNsYq9-aKbQoFz6jjXX47AWk8en6jmatQxmj5bYVvYk71NlGxNjgS9gKoPhR_mbM0PsjEvqPozr3DaBuMeDi-1U8Hy1FeV9rr";
+var regtoken = "fU_HcejHb5I:APA91bF46wbJHp5AyQaaQChhUdWkSnnsi1GOShUht0jsMYUOHTAiS9xexjhP8KdTzuWj25Aguz3-6be4WuKhlAZ0PY7MQdPIU4uZENB1VFw3QxTElIm7_yGtNohZwSY5A0EXMyTsqqgH"
+var payload = { data: {mykey: "connect"}};
+var payload1 = { data: {mykey: "start"}};
+var payload2 = { data: {mykey: "stop"}};
+
+var options = { priority:"high", timeToLive: 0};
+
+var p_st = -1;
+
+app.intent('connect', conv => {
+  
+  conv.ask('Ok, wait a moment!');
+
+  
+var n1=admin.messaging().sendToDevice(regtoken,payload,options);
+
+  conv.ask(new BasicCard({
+      	title: "language",
+      	text: String(n1),
+    	buttons: new Button({ // Wrapper for complex sub Objects
+      	title: 'Button Title',
+      	url: 'https://www.google.com',
+    }),
+    display: 'WHITE',
+
+  }));
+    
+conv.ask('Hello, Successfully sent message!');
+    
+ 
+});
+
+
+app.intent('start', conv => {
+  conv.ask('Ok, Let me switch on the lamp!');
+var n1=admin.messaging().sendToDevice(regtoken,payload1,options);
+ 
+});
+
+app.intent('stop', conv => {
+  conv.ask('Ok, Let me switch off the lamp!');
+var n1=admin.messaging().sendToDevice(regtoken,payload2,options);
+ 
+});
+
+p_st=-1;
+
+app.intent('Default Fallback Intent', conv => {
+  conv.ask(`I didn't understand`)
+  conv.ask(`I'm sorry, can you try again?`)
+})
+
+exports.dialogflowFirebaseFulfillment = functions.https.onRequest(app)
